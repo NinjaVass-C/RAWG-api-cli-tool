@@ -6,6 +6,7 @@ import {
     validateSearchFlagMulti, validateString
 } from "./utils/ValidateValues.ts";
 import type {CommandArgs} from "./types/cli.ts";
+import {buildApiUrl} from "./utils/BuildApiUrl.ts";
 
 
 
@@ -38,6 +39,8 @@ function parseCommands(): CommandArgs {
     const parsed: CommandArgs = {
         resource,
         action,
+        page: 1,
+        page_size: 5
     };
 
     switch (resource) {
@@ -49,7 +52,7 @@ function parseCommands(): CommandArgs {
                         if (formatted === null) {
                             throw new Error(`Invalid genre flag: ${values.genre}`)
                         } else {
-                            parsed.genre = formatted
+                            parsed.genres = formatted
                         }
                     }
                     if (values.tags) {
@@ -65,7 +68,7 @@ function parseCommands(): CommandArgs {
                         if (formatted === null) {
                             throw new Error(`Invalid developer flag: ${values.developer}`)
                         } else {
-                            parsed.developer = formatted
+                            parsed.developers = formatted
                         }
                     }
                     if (values.release_date) {
@@ -107,8 +110,8 @@ function parseCommands(): CommandArgs {
             break;
         // the api only supports listing for these endpoints,
         // so they can be combined to one case.
-        case 'genre':
-        case 'platform':
+        case 'genres':
+        case 'platforms':
         case 'developers':
         case 'tags':
                 switch (action) {
@@ -139,20 +142,27 @@ function parseCommands(): CommandArgs {
             throw new Error(`Invalid page_size: ${values.page_size}`);
         }
         parsed.page_size = validPageSize;
-    } else {
-        parsed.page_size = 25
     }
 
     if (values.format != null) {
         if (typeof values.format === "boolean") {
             parsed.display_json = values.format;
         }
-    } else {
-        parsed.display_json = false;
     }
-
     return parsed;
 }
+
+async function fetchData(args: CommandArgs) {
+    const url = buildApiUrl(args)
+    console.log(url)
+    const response = await fetch(url)
+    const data: any = await response.json()
+    if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status} ${response.statusText}, error message: ${data.message}`);
+    }
+    console.log(data)
+}
+
 
 
 
@@ -160,6 +170,7 @@ async function main() {
     try {
         const args = await parseCommands();
         console.log(args);
+        await fetchData(args);
     } catch (error: any) {
         console.log("An error has occured: " + error.message);
     }
