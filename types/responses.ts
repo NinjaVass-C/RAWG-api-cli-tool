@@ -23,15 +23,19 @@ export type genre = baseResponse & {
 
 export type gameResponse = baseResponse & {
     platforms: platform[],
-    released: string,
+    released?: string,
     tags: tag[],
     genres: genre[],
     rating: number
-    metacritic: number
+    metacritic?: number
     description?: string
+    developers: developer[],
 }
 
 
 export type developer = baseResponse & {
     games_count: number
+    description?: string
 }
+
+export type apiValidationResponse = gameResponse | gameResponse[] | tag[] | genre[] | platform[] | developer[] | genre | developer | platform | tag

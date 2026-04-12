@@ -7,7 +7,7 @@ export function validateNumber(input: any, fieldName: string): number {
 
     const num = Number(input);
 
-    if (isNaN(num) || !isFinite(num) || num <= 0) {
+    if (isNaN(num) || !isFinite(num) || num < 0) {
         throw new Error(`Invalid ${fieldName}: ${input}`);
     }
 
@@ -23,14 +23,18 @@ export function validateOptionalNumber(value: unknown, fieldName: string): numbe
 
 export function validateString(input: unknown, fieldName: string): string {
     if (typeof input !== "string" || input.trim() === "") {
-        throw new Error(`Invalid ${fieldName}: ${input}`);
+        if (fieldName === "key") {
+            throw new Error(`Invalid ${fieldName}: HIDDEN FOR SECURITY`);
+        } else {
+            throw new Error(`Invalid ${fieldName}: ${input}`);
+        }
     }
 
     return input;
 }
 
 export function validateOptionalString(value: unknown, fieldName: string): string | undefined {
-    if (value === undefined || value === null) return undefined;
+    if (value === undefined || value === null || value === "") return undefined;
 
     return validateString(value, fieldName);
 }
@@ -48,6 +52,11 @@ export function validateSearchFlagMulti(input: string | undefined | null): strin
 }
 
 export function validateParamDate(input: string): string {
+    // For games that do not have a release date, the api returns null.
+    if (input === null) {
+        return "To be announced";
+    }
+
     if (!input) {
         throw new Error(`Invalid date: ${input}`);
     }

@@ -2,18 +2,13 @@ import type {CommandArgs} from "../types/cli.ts";
 import {validateString} from "./ValidateValues.ts";
 
 export function buildApiUrl(args: CommandArgs) {
-    const baseUrl = process.env.BASE_URL ?? "";
-    const KEY = process.env.API_KEY ?? "";
-    if (validateString(baseUrl) === null) {
-        throw new Error("Base URL is undefined")
-    }
-    if (validateString(KEY) === null) {
-        throw new Error("API KEY is invalid")
-    }
-    const url = new URL(baseUrl + '/' + args.resource);
+    const baseUrl = validateString(process.env.BASE_URL, "url");
+    const KEY = validateString(process.env.API_KEY, "key");
+    const url = new URL(baseUrl + '/' + args.resource + (args.id ? "/" + args.id : ""));
     url.searchParams.append("key", KEY);
-    if (args.release_date) {
-        url.searchParams.append("dates", args.release_date);
+    if (args.release_dates) {
+        const datesString = args.release_dates.join(",");
+        url.searchParams.append("dates", datesString);
     }
     if (args.developers) {
         const developerString = args.developers.join(",")
@@ -21,7 +16,6 @@ export function buildApiUrl(args: CommandArgs) {
     }
     if (args.genres) {
         const genreString = args.genres.join(",");
-        console.log(genreString);
         url.searchParams.append("genres", genreString)
     }
     if (args.tags) {
@@ -33,6 +27,6 @@ export function buildApiUrl(args: CommandArgs) {
     }
     url.searchParams.append("page", String(args.page));
     url.searchParams.append("page_size", String(args.page_size));
-
+    console.log(url)
     return url;
 }

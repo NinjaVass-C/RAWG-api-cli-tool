@@ -1,5 +1,12 @@
 import type {CommandArgs} from "../types/cli.ts";
-import type {gameResponse, tag, platform, genre, developer} from "../types/responses.ts"
+import type {
+    gameResponse,
+    tag,
+    platform,
+    genre,
+    developer,
+    apiValidationResponse
+} from "../types/responses.ts"
 import {
     validateNumber,
     validateOptionalNumber,
@@ -8,18 +15,10 @@ import {
     validateString
 } from "./ValidateValues.ts";
 
-export function validateResponses(data: any, args: CommandArgs): gameResponse
-| gameResponse[]
-| tag[]
-| genre[]
-| platform[]
-| developer[]
-| genre
-| developer
-| platform
-| tag {
+export function validateResponses(data: any, args: CommandArgs): apiValidationResponse {
     switch (args.resource) {
         case "games":
+        case "game-details":
             if (Array.isArray(data.results)) {
                 return data.results.map((game: any, index: number): gameResponse => {
                     try {
@@ -41,7 +40,7 @@ export function validateResponses(data: any, args: CommandArgs): gameResponse
                     }
                 })
             }
-            throw new Error("Not supported: looking for one tag")
+            return validateTagsResponse(data);
         case "genres":
             if (Array.isArray(data.results)) {
                 return data.results.map((genre: any, index: number): genre => {
@@ -87,8 +86,9 @@ function validateGameResponse(data: any): gameResponse {
         slug: validateString(data.slug, "slug"),
         released: validateParamDate(data.released),
         rating: validateNumber(data.rating, "rating"),
-        metacritic: validateNumber(data.metacritic, "metacritic"),
-        // needed to format the platforms from the api to a easier to use format.
+        // while testing, the api just doesn't have metacritic ratings for some games, so make it optional
+        metacritic: validateOptionalNumber(data.metacritic, "metacritic"),
+        // needed to format the platforms from the api to an easier to use format.
         platforms: validateArray(
             data.platforms,
             (p) => ({
@@ -120,6 +120,17 @@ function validateGameResponse(data: any): gameResponse {
             }),
             "tags"
         ),
+
+        developers: validateArray(
+            data.developers,
+            (t) => ({
+                id: validateNumber(t.id, "tag.id"),
+                name: validateString(t.name, "tag.name"),
+                slug: validateString(t.slug, "tag.slug"),
+                games_count: validateNumber(t.games_count, "games_count"),
+            }),
+            "developers", true
+        ),
         description: validateOptionalString(data.description, "description")
     };
 }
@@ -131,6 +142,7 @@ function validateDeveloperResponse(data: any): developer {
         name: validateString(data.name, "name"),
         slug: validateString(data.slug, "slug"),
         games_count: validateNumber(data.games_count, "games_count"),
+        description: validateOptionalString(data.description, "description"),
     }
 }
 
@@ -150,6 +162,9 @@ function validatePlatformResponse(data: any): platform {
         id: validateNumber(data.id, "id"),
         name: validateString(data.name, "name"),
         slug: validateString(data.slug, "slug"),
+        description: validateOptionalString(data.description, "description"),
+        year_start: validateOptionalNumber(data.year_start, "year_start"),
+        year_end: validateOptionalNumber(data.year_end, "year_end"),
     };
 }
 
@@ -163,7 +178,11 @@ function validateGenreResponse(data: any): genre {
     }
 }
 
-function validateArray<T>(arr: any, mapper: (item: any, index: number) => T, fieldName: string): T[] {
+function validateArray<T>(arr: any, mapper: (item: any, index: number) => T, fieldName: string, optional: boolean = false): T[] {
+    if (optional && !Array.isArray(arr)) {
+        return [];
+    }
+
     if (!Array.isArray(arr)) {
         throw new Error(`Expected ${fieldName} to be an array`);
     }

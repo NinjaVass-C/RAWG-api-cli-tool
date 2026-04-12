@@ -4,9 +4,10 @@ export type CommandArgs = {
     query?: string;
     page: number;
     page_size: number;
-    display_json?: boolean;
+    display_json: boolean;
     genres?: string[];
     tags?: string[];
     developers?: string[];
-    release_date?: string;
+    release_dates?: string[];
+    id?: string;
 };

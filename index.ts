@@ -8,6 +8,7 @@ import {
 import type {CommandArgs} from "./types/cli.ts";
 import {buildApiUrl} from "./utils/BuildApiUrl.ts";
 import {validateResponses} from "./utils/ValidateResponses.ts";
+import {printResponse} from "./utils/PrintResponse.ts";
 
 
 
@@ -28,10 +29,11 @@ function parseCommands(): CommandArgs {
             page: { type: "string" },
             page_size: { type: "string" },
             display_json: { type: "boolean" },
-            genre: { type: "string" },
+            genres: { type: "string" },
             tags: { type: "string" },
             developers: { type: "string" },
-            release_date: { type: "string" },
+            release_dates: { type: "string" },
+            id: {type: "string"}
         },
         allowPositionals: true,
         strict: false,
@@ -41,9 +43,9 @@ function parseCommands(): CommandArgs {
         resource,
         action,
         page: 1,
-        page_size: 5
+        page_size: 5,
+        display_json: false,
     };
-    // todo make these take slugs for individual searches.
     switch (resource) {
         case 'games':
             switch (action) {
@@ -57,8 +59,13 @@ function parseCommands(): CommandArgs {
                     if (values.developers) {
                         parsed.developers = validateSearchFlagMulti(<string>values.developers)
                     }
-                    if (values.release_date) {
-                        parsed.release_date = validateParamDate(<string>values.release_date)
+                    if (values.release_dates) {
+                        const dates = validateSearchFlagMulti(<string>values.release_dates);
+                        if (!dates || dates.length !== 2) {
+                            throw new Error("Api only supports start and end filter for release dates")
+                        }
+                        dates.forEach(date => {validateParamDate(date)})
+                        parsed.release_dates = dates
                     }
                     if (positionals.join("").length !== 0) {
                         parsed.query = validateString(positionals.join(""), "search");
@@ -70,10 +77,11 @@ function parseCommands(): CommandArgs {
                     throw new Error(`Unknown or unsupported action: ${action}`);
             }
             break;
-        case 'gamedetails':
+        case 'game-details':
                 switch (action) {
                     case 'search':
-                        parsed.query = validateString(positionals.join(""), "search");
+                        parsed.id = validateString(positionals.join(""), "search");
+                        parsed.resource = "games"
                         break;
                     default:
                         throw new Error(`Unknown or unsupported action: ${action}`);
@@ -85,7 +93,7 @@ function parseCommands(): CommandArgs {
         case 'tags':
                 switch (action) {
                     case 'search':
-                        parsed.query = validateString(positionals.join(""), "search");
+                        parsed.id = validateString(positionals.join(""), "search");
                         break;
                     case 'list':
                         break;
@@ -107,11 +115,8 @@ function parseCommands(): CommandArgs {
     if (values.page_size) {
         parsed.page_size = validateNumber(<string>values.page_size, "page_size");
     }
-
-    if (values.format != null) {
-        if (typeof values.format === "boolean") {
-            parsed.display_json = values.format;
-        }
+    if (values.display_json != null) {
+        parsed.display_json = <boolean>values.display_json;
     }
     return parsed;
 }
@@ -123,16 +128,16 @@ async function fetchData(args: CommandArgs) {
     if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status} ${response.statusText}, error message: ${data.message}`);
     }
-    const formattedData = validateResponses(data, args)
-    console.log(formattedData)
-
+    return validateResponses(data, args)
 }
+
 
 async function main() {
     try {
         const args = await parseCommands();
-        console.log(args);
-        await fetchData(args);
+        const data = await fetchData(args);
+        console.log(data);
+        printResponse(data, args)
     } catch (error: any) {
         console.log("An error has occured: " + error.message);
     }
