@@ -27,6 +27,5 @@ export function buildApiUrl(args: CommandArgs) {
     }
     url.searchParams.append("page", String(args.page));
     url.searchParams.append("page_size", String(args.page_size));
-    console.log(url)
     return url;
 }

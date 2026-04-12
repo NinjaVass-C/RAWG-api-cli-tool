@@ -9,7 +9,7 @@ import type {CommandArgs} from "./types/cli.ts";
 import {buildApiUrl} from "./utils/BuildApiUrl.ts";
 import {validateResponses} from "./utils/ValidateResponses.ts";
 import {printResponse} from "./utils/PrintResponse.ts";
-
+import {checkCache, createCache} from "./cache/Cache.ts";
 
 
 function parseCommands(): CommandArgs {
@@ -123,20 +123,26 @@ function parseCommands(): CommandArgs {
 
 async function fetchData(args: CommandArgs) {
     const url = buildApiUrl(args)
+    const cachedData = await checkCache(url)
+    if (cachedData) {
+        // this would have been validated before getting cached, so it can be returned like this
+        return cachedData;
+    }
     const response = await fetch(url)
     const data: any = await response.json()
     if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status} ${response.statusText}, error message: ${data.message}`);
     }
-    return validateResponses(data, args)
+    const validData = validateResponses(data, args);
+    await createCache(url, validData)
+    return validData;
 }
 
 
 async function main() {
     try {
-        const args = await parseCommands();
+        const args = parseCommands();
         const data = await fetchData(args);
-        console.log(data);
         printResponse(data, args)
     } catch (error: any) {
         console.log("An error has occured: " + error.message);
