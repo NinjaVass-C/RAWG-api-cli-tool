@@ -7,6 +7,7 @@ import {
 } from "./utils/ValidateValues.ts";
 import type {CommandArgs} from "./types/cli.ts";
 import {buildApiUrl} from "./utils/BuildApiUrl.ts";
+import {validateResponses} from "./utils/ValidateResponses.ts";
 
 
 
@@ -29,7 +30,7 @@ function parseCommands(): CommandArgs {
             display_json: { type: "boolean" },
             genre: { type: "string" },
             tags: { type: "string" },
-            developer: { type: "string" },
+            developers: { type: "string" },
             release_date: { type: "string" },
         },
         allowPositionals: true,
@@ -42,52 +43,26 @@ function parseCommands(): CommandArgs {
         page: 1,
         page_size: 5
     };
-
+    // todo make these take slugs for individual searches.
     switch (resource) {
         case 'games':
             switch (action) {
                 case 'search':
                     if (values.genre) {
-                        const formatted = validateSearchFlagMulti(<string>values.genre)
-                        if (formatted === null) {
-                            throw new Error(`Invalid genre flag: ${values.genre}`)
-                        } else {
-                            parsed.genres = formatted
-                        }
+                        parsed.genres = validateSearchFlagMulti(<string>values.genre)
                     }
                     if (values.tags) {
-                        const formatted = validateSearchFlagMulti(<string>values.tags)
-                        if (formatted === null) {
-                            throw new Error(`Invalid tags flag: ${values.tags}`)
-                        } else {
-                            parsed.tags = formatted
-                        }
+                        parsed.tags = validateSearchFlagMulti(<string>values.tags)
                     }
-                    if (values.developer) {
-                        const formatted = validateSearchFlagMulti(<string>values.developer)
-                        if (formatted === null) {
-                            throw new Error(`Invalid developer flag: ${values.developer}`)
-                        } else {
-                            parsed.developers = formatted
-                        }
+                    if (values.developers) {
+                        parsed.developers = validateSearchFlagMulti(<string>values.developers)
                     }
                     if (values.release_date) {
-                        const formatted = validateParamDate(<string>values.release_date)
-                        if (formatted === null) {
-                            throw new Error(`Invalid release date flag: ${values.release_date}`)
-                        } else {
-                            parsed.release_date = formatted
-                        }
+                        parsed.release_date = validateParamDate(<string>values.release_date)
                     }
                     if (positionals.join("").length !== 0) {
-                        const formatted = validateString(positionals.join(""));
-                        if (formatted === null) {
-                            throw new Error(`Invalid search: ${positionals.join("")}`);
-                        } else {
-                            parsed.query = formatted;
-                        }
+                        parsed.query = validateString(positionals.join(""), "search");
                     }
-
                     break;
                 case 'list':
                     break;
@@ -98,23 +73,20 @@ function parseCommands(): CommandArgs {
         case 'gamedetails':
                 switch (action) {
                     case 'search':
-                        const validId = validateNumber(positionals.join(""));
-                        if (validId === null) {
-                            throw new Error(`Invalid Id: ${positionals.join("")}`);
-                        }
-                        parsed.query = validId.toString();
+                        parsed.query = validateString(positionals.join(""), "search");
                         break;
                     default:
                         throw new Error(`Unknown or unsupported action: ${action}`);
                 }
             break;
-        // the api only supports listing for these endpoints,
-        // so they can be combined to one case.
         case 'genres':
         case 'platforms':
         case 'developers':
         case 'tags':
                 switch (action) {
+                    case 'search':
+                        parsed.query = validateString(positionals.join(""), "search");
+                        break;
                     case 'list':
                         break;
                     default:
@@ -127,21 +99,13 @@ function parseCommands(): CommandArgs {
 
 
     if (values.page) {
-        const validPage = validateNumber(<string>values.page);
-        if (validPage === null) {
-            throw new Error(`Invalid page: ${values.page}`);
-        }
-        parsed.page = validPage
+        parsed.page = validateNumber(<string>values.page, "page");
     } else {
         parsed.page = 1
     }
 
     if (values.page_size) {
-        const validPageSize = validateNumber(<string>values.page_size);
-        if (validPageSize === null) {
-            throw new Error(`Invalid page_size: ${values.page_size}`);
-        }
-        parsed.page_size = validPageSize;
+        parsed.page_size = validateNumber(<string>values.page_size, "page_size");
     }
 
     if (values.format != null) {
@@ -154,17 +118,15 @@ function parseCommands(): CommandArgs {
 
 async function fetchData(args: CommandArgs) {
     const url = buildApiUrl(args)
-    console.log(url)
     const response = await fetch(url)
     const data: any = await response.json()
     if (!response.ok) {
         throw new Error(`HTTP Error: ${response.status} ${response.statusText}, error message: ${data.message}`);
     }
-    console.log(data)
+    const formattedData = validateResponses(data, args)
+    console.log(formattedData)
+
 }
-
-
-
 
 async function main() {
     try {
