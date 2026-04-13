@@ -10,12 +10,16 @@ import {buildApiUrl} from "./utils/BuildApiUrl.ts";
 import {validateResponses} from "./utils/ValidateResponses.ts";
 import {printResponse} from "./utils/PrintResponse.ts";
 import {checkCache, createCache} from "./cache/Cache.ts";
+import {helpMessage} from "./utils/HelpMessage.ts";
 
 
 function parseCommands(): CommandArgs {
     // buns first two cli arguments are the runtime and file path, so remove them
     const args = Bun.argv.slice(2);
-
+    if (args.length === 1 && args[0] === "help") {
+        console.log(helpMessage)
+        process.exit(1);
+    }
     if (args.length < 2) {
         throw new Error('You must include at least an action and a resource')
     }

@@ -1,6 +1,6 @@
 API CLI Test Commands (RAWG)
 
-This document contains example commands to test the CLI against the RAWG Video Games Database API.
+Here are some commands to run in order to test the cli.
 
 ```
 api-cli games search "elden ring"
