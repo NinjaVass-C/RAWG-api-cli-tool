@@ -18,7 +18,7 @@ function parseCommands(): CommandArgs {
     const args = Bun.argv.slice(2);
     if (args.length === 1 && args[0] === "help") {
         console.log(helpMessage)
-        process.exit(1);
+        process.exit(0);
     }
     if (args.length < 2) {
         throw new Error('You must include at least an action and a resource')
@@ -54,7 +54,7 @@ function parseCommands(): CommandArgs {
         case 'games':
             switch (action) {
                 case 'search':
-                    if (values.genre) {
+                    if (values.genres) {
                         parsed.genres = validateSearchFlagMulti(<string>values.genre)
                     }
                     if (values.tags) {
@@ -149,7 +149,7 @@ async function main() {
         const data = await fetchData(args);
         printResponse(data, args)
     } catch (error: any) {
-        console.log("An error has occured: " + error.message);
+        console.log("An error has occurred: " + error.message);
     }
 }
 

@@ -12,6 +12,12 @@ bun link
 ```
 #### This allows you to use the shorthand for the cli, `api-cli` instead of `bun run index.ts` every time.
 
+### Other Setup
+
+1. Copy the example environment file (.env.example) to your .env file
+2. Fill in your API key from https://rawg.io/apidocs (you will have to register an account)
+``Note that you can put local host as the website host when asked during registration.``
+
 ## CLI Features
 
 The cli comes with multiple quality of life features for interacting with the RAWG api. Here are some examples:
@@ -41,7 +47,7 @@ game-details
 search <id or slug>         Get details for a specific game by ID or slug
 
 genres | platforms | developers | tags
-search <id or slug>         Search by ID ir slug
+search <id or slug>         Search by ID or slug
 list                        List all available
 
 GLOBAL OPTIONS:
@@ -75,7 +81,7 @@ NOTES:
 - Multiple filter values must be comma-separated (no spaces)
 - Release dates must include both start and end dates
 - Invalid inputs will return descriptive errors
-- Responses can be Incredibly Large, please keep that in mind while adjusting page size
+- Responses can be incredibly large, please keep that in mind while adjusting page size
 ```
 
 ### CLI Examples
