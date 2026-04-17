@@ -20,6 +20,13 @@ bun link
 
 ## CLI Features
 
+### Core Use Cases
+1. Browse available resources (games, genres, platforms)
+2. Search for games using filters
+3. Retrieve detailed game information
+4. Discover random games
+
+### Technical Features
 The cli comes with multiple quality of life features for interacting with the RAWG api. Here are some examples:
 - Multiple options and flags for core api resources, allowing you to spend less time building the complex queries required for filtering
 - Flag to toggle between JSON formatting and properly formatted responses

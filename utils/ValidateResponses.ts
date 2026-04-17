@@ -88,7 +88,6 @@ function validateGameResponse(data: any): gameResponse {
         rating: validateNumber(data.rating, "rating"),
         // while testing, the api just doesn't have metacritic ratings for some games, so make it optional
         metacritic: validateOptionalNumber(data.metacritic, "metacritic"),
-        // needed to format the platforms from the api to an easier to use format.
         platforms: validateArray(
             data.platforms,
             (p) => ({
@@ -120,13 +119,14 @@ function validateGameResponse(data: any): gameResponse {
             }),
             "tags"
         ),
-
+        // leaving this in as api documentation states developers should get pulled in
+        // but it doesn't seem to be working that way during testing.
         developers: validateArray(
             data.developers,
             (t) => ({
-                id: validateNumber(t.id, "tag.id"),
-                name: validateString(t.name, "tag.name"),
-                slug: validateString(t.slug, "tag.slug"),
+                id: validateNumber(t.id, "developer.id"),
+                name: validateString(t.name, "developer.name"),
+                slug: validateString(t.slug, "developer.slug"),
                 games_count: validateNumber(t.games_count, "games_count"),
             }),
             "developers", true
@@ -177,7 +177,10 @@ function validateGenreResponse(data: any): genre {
         games_count: validateOptionalNumber(data.games_count, "games_count"),
     }
 }
-
+// Validation helper that is used for validating the response arrays (genres, platforms, etc) that are
+// returned for each game response. It accepts an array of a single response type, then maps each value of each array index
+// to its associated validationHelper. If a response is invalid, it throws a new error, indicating the array index, the field
+// and the error message.
 function validateArray<T>(arr: any, mapper: (item: any, index: number) => T, fieldName: string, optional: boolean = false): T[] {
     if (optional && !Array.isArray(arr)) {
         return [];
