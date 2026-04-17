@@ -86,6 +86,7 @@ function parseCommands(): CommandArgs {
                     }
                     break;
                 case 'list':
+                case 'random':
                     break;
                 default:
                     throw new Error(`Unknown or unsupported action: ${action}`);
@@ -93,7 +94,7 @@ function parseCommands(): CommandArgs {
             break;
         case 'game-details':
                 switch (action) {
-                    case 'search':
+                    case 'get':
                         parsed.id = validateString(positionals.join(""), "search");
                         parsed.resource = "games"
                         break;

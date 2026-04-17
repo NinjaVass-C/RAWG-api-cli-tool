@@ -28,12 +28,21 @@ export function buildApiUrl(args: CommandArgs) {
     if (args.query) {
         url.searchParams.append("search", args.query);
     }
-    url.searchParams.append("page", String(args.page));
-    url.searchParams.append("page_size", String(args.page_size));
+    // the api db randomly has invalid ids, so find random using pagination
+    if (args.action === "random") {
+        // 750000 is kind of arbitrary, but was a number that was getting returned by the db,
+        // and gives the user a decent number of 'random' games to find.
+        const id = String(Math.round(Math.random() * 750000) + 1)
+        url.searchParams.append("page", String(id))
+        url.searchParams.append("page_size", String(1))
+    } else {
+        url.searchParams.append("page", String(args.page));
+        url.searchParams.append("page_size", String(args.page_size));
+    }
     let finalUrl = url.toString();
     if (commaParams.length > 0) {
         finalUrl += `&${commaParams.join("&")}`;
-        console.log(finalUrl);
     }
+    console.log(finalUrl);
     return finalUrl;
 }

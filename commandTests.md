@@ -16,7 +16,8 @@ api-cli platforms search "playstation4"
 api-cli platforms list
 api-cli developers search "nintendo"
 api-cli developers list
-api-cli game-details search "cyberpunk-2077"
+api-cli game-details get "cyberpunk-2077"
 api-cli games search "war" --tags=multiplayer,fun --genres=action,rpg
 api-cli games search "star" --tags=multiplayer,space --developers=ubisoft --release_dates=2015-01-01,2023-01-01 --page=1 --page_size=3
 api-cli games search "star" --tags=multiplayer,space --release_dates=2015-01-01,2023-01-01 --page=1 --page_size=3
+api-cli games random

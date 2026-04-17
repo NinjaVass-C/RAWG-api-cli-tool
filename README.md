@@ -40,15 +40,16 @@ RESOURCES & ACTIONS:
 help                          No actions, displays this screen to console.
 
 games
-search [query]              Search for games
-list                        List games
+search [query]                Search for games using filters and queries
+list                          List games and associated resources
+random                        Discover a random game 
 
 game-details
-search <id or slug>         Get details for a specific game by ID or slug
+get <id or slug>              Retrieve details for a specific game by ID or slug
 
 genres | platforms | developers | tags
-search <id or slug>         Search by ID or slug
-list                        List all available
+search <id or slug>           Search for resource by ID or slug
+list                          Browse available resources
 
 GLOBAL OPTIONS:
 --page <number>               Page number (default: 1)
