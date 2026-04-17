@@ -1,4 +1,4 @@
-API CLI Test Commands (RAWG)
+API CLI Test Commands
 
 Here are some commands to run in order to test the cli.
 

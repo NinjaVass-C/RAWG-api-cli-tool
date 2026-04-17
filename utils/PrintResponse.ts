@@ -8,12 +8,12 @@ export function printResponse(data: apiValidationResponse, args: CommandArgs) {
     console.log(`Display JSON flag: ${args.display_json}\n`);
 
     if (args.display_json) {
-        console.log("--------------- RAW JSON OUTPUT ---------------");
+        console.log("--------------- RAW JSON OUTPUT ----------------");
         console.log(JSON.stringify(data, null, 2));
         console.log("------------------------------------------------\n");
     } else {
         console.log(`Page: ${args.page} | Page Size: ${args.page_size}`);
-        console.log("-------------------------------------------------------\n");
+        console.log("------------------------------------------------\n");
 
         switch (args.resource) {
             case "platforms":
@@ -57,7 +57,7 @@ function printPlatform(data: platform) {
     if (data.year_end) {
         console.log(`Year End: ${data.year_end}`);
     }
-    console.log("-------------------------\n");
+    console.log("-------------------------");
 }
 
 function printTag(data: tag) {
@@ -75,7 +75,7 @@ function printTag(data: tag) {
     if (data.description) {
         console.log(`Description: ${stripHtml(data.description)}`);
     }
-    console.log("-------------------------\n");
+    console.log("-------------------------");
 }
 
 function printGenre(data: genre) {
@@ -89,7 +89,7 @@ function printGenre(data: genre) {
     if (data.games_count) {
         console.log(`Games Count: ${data.games_count}`);
     }
-    console.log("  -------------------------\n");
+    console.log("-------------------------");
 }
 
 function printDeveloper(data: developer) {
@@ -101,7 +101,7 @@ function printDeveloper(data: developer) {
     if (data.description) {
         console.log(`Description: ${stripHtml(data.description)}`);
     }
-    console.log("  -------------------------\n");
+    console.log("-------------------------");
 }
 
 function printGameResponse(data: gameResponse) {
