@@ -66,7 +66,7 @@ Search for a game:
 api-cli games search halo
 
 Search with filters:
-api-cli games search halo --genres=action,shooter --page=2
+api-cli games search halo --genres=action --page=2
 
 Get game details:
 api-cli game-details search 3498
@@ -83,6 +83,8 @@ NOTES:
 - Invalid inputs will return descriptive errors
 - Responses can be incredibly large, please keep that in mind while adjusting page size
 ```
+### Developer Note:
+``When filtering with multiple values, the CLI output will show values that include ONE OF the listed values, not all of them, this is not an issue with the CLI, rather an issue with inconsistent filtering rules on the side of RAWG``
 
 ### CLI Examples
 #### For more examples as to how the cli works, please look at `commandTests.md`, which contains examples of every resource and action available for the cli.

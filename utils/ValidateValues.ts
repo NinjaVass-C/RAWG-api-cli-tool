@@ -40,7 +40,8 @@ export function validateOptionalString(value: unknown, fieldName: string): strin
 }
 
 export function validateSearchFlagMulti(input: string | undefined | null): string[] | undefined {
-    if (!input) return undefined;
+    if (!input) throw new Error("No valid search flags provided");
+    console.log("input", input);
 
     const result = input.split(",").map(i => i.trim()).filter(Boolean);
 

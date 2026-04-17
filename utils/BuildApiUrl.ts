@@ -6,26 +6,34 @@ export function buildApiUrl(args: CommandArgs) {
     const KEY = validateString(process.env.API_KEY, "key");
     const url = new URL(baseUrl + '/' + args.resource + (args.id ? "/" + args.id : ""));
     url.searchParams.append("key", KEY);
+    // Due to an issue with rawg encoding, passing comma separated filters through
+    // params causes api filtering to be inconsistent, so it must be appended to the actual url.
+    let commaParams = []
     if (args.release_dates) {
         const datesString = args.release_dates.join(",");
-        url.searchParams.append("dates", datesString);
+        commaParams.push(`dates=${datesString}`);
     }
     if (args.developers) {
         const developerString = args.developers.join(",")
-        url.searchParams.append("developers", developerString);
+        commaParams.push(`developers=${developerString}`);
     }
     if (args.genres) {
         const genreString = args.genres.join(",");
-        url.searchParams.append("genres", genreString)
+        commaParams.push(`genres=${genreString}`);
     }
     if (args.tags) {
         const tagString = args.tags.join(",")
-        url.searchParams.append("tags", tagString)
+        commaParams.push(`tags=${tagString}`);
     }
     if (args.query) {
         url.searchParams.append("search", args.query);
     }
     url.searchParams.append("page", String(args.page));
     url.searchParams.append("page_size", String(args.page_size));
-    return url;
+    let finalUrl = url.toString();
+    if (commaParams.length > 0) {
+        finalUrl += `&${commaParams.join("&")}`;
+        console.log(finalUrl);
+    }
+    return finalUrl;
 }

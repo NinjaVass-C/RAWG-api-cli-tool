@@ -26,7 +26,7 @@ function parseCommands(): CommandArgs {
 
     const [resource, action, ...rest] = args;
 
-    // Parse flags using parseArgs (keep what you already know)
+    // Parse flags using parseArgs
     const { values, positionals } = parseArgs({
         args: rest,
         options: {
@@ -47,7 +47,7 @@ function parseCommands(): CommandArgs {
         resource,
         action,
         page: 1,
-        page_size: 5,
+        page_size: 3,
         display_json: false,
     };
     switch (resource) {
@@ -55,18 +55,28 @@ function parseCommands(): CommandArgs {
             switch (action) {
                 case 'search':
                     if (values.genres) {
-                        parsed.genres = validateSearchFlagMulti(<string>values.genre)
+                        parsed.genres = validateSearchFlagMulti(<string>values.genres)
                     }
+
                     if (values.tags) {
-                        parsed.tags = validateSearchFlagMulti(<string>values.tags)
+                        if (typeof values.tags !== "string") {
+                            throw new Error("Invalid value for tags")
+                        }
+                        parsed.tags = validateSearchFlagMulti(values.tags)
                     }
                     if (values.developers) {
-                        parsed.developers = validateSearchFlagMulti(<string>values.developers)
+                        if (typeof values.developers !== "string") {
+                            throw new Error("Invalid value for developers")
+                        }
+                        parsed.developers = validateSearchFlagMulti(values.developers)
                     }
                     if (values.release_dates) {
-                        const dates = validateSearchFlagMulti(<string>values.release_dates);
+                        if (typeof values.release_dates !== "string") {
+                            throw new Error("Invalid value for release dates")
+                        }
+                        const dates = validateSearchFlagMulti(values.release_dates);
                         if (!dates || dates.length !== 2) {
-                            throw new Error("Api only supports start and end filter for release dates")
+                            throw new Error("Api only supports one start-end date pairing at a time")
                         }
                         dates.forEach(date => {validateParamDate(date)})
                         parsed.release_dates = dates
@@ -126,7 +136,7 @@ function parseCommands(): CommandArgs {
 }
 
 async function fetchData(args: CommandArgs) {
-    const url = buildApiUrl(args)
+    const url = new URL(buildApiUrl(args))
     const cachedData = await checkCache(url)
     if (cachedData) {
         // this would have been validated before getting cached, so it can be returned like this
@@ -135,7 +145,7 @@ async function fetchData(args: CommandArgs) {
     const response = await fetch(url)
     const data: any = await response.json()
     if (!response.ok) {
-        throw new Error(`HTTP Error: ${response.status} ${response.statusText}, error message: ${data.message}`);
+        throw new Error(`HTTP Error: ${response.status} ${response.statusText}, ${data.detail ? `API Response Message: ${data.detail}` : "Your request to the api was unable to be processed, please ensure you have entered correct values to your command."}`);
     }
     const validData = validateResponses(data, args);
     await createCache(url, validData)
